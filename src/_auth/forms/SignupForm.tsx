@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { SignupValidation } from "@/lib/validation";
 import { z } from "zod";
+import Loader from "@/components/shared/Loader";
 
 const SignupForm = () => {
   const isLoading = false;
@@ -41,7 +43,7 @@ const SignupForm = () => {
           Create a new account
         </h2>
         <p className="text-light-3 small-medium md:base-regular mt-2">
-          To use snapgrm enter your account details
+          To use snapgrm, please enter your account details
         </p>
 
         <form
@@ -107,11 +109,15 @@ const SignupForm = () => {
 
           <Button type="submit" className="shad-button_primary">
             {isLoading ? (
-              <div className="flex-center gap-2">Loading...</div>
+              <div className="flex-center gap-2"><Loader/>Loading...</div>
             ) : (
               "Sign up"
             )}
           </Button>
+          <p className="text-small-regular text-light-2 text-center mt-2">
+            Already have an account?
+            <Link to={"/sign-in"} className="text-primary-500 text-small-semibold ml-1">Log in</Link>
+            </p>
         </form>
       </div>
     </Form>
