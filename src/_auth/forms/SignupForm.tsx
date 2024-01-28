@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -16,8 +15,10 @@ import { SignupValidation } from "@/lib/validation";
 import { z } from "zod";
 import Loader from "@/components/shared/Loader";
 import { createUserAccount } from "@/lib/appwrite/api";
+import { useToast } from "@/components/ui/use-toast";
 
 const SignupForm = () => {
+  const { toast } = useToast()
   const isLoading = false;
   const form = useForm<z.infer<typeof SignupValidation>>({
     resolver: zodResolver(SignupValidation),
@@ -29,10 +30,17 @@ const SignupForm = () => {
     },
   });
 
- async function onSubmit(values: z.infer<typeof SignupValidation>) {
-    const newUser = await createUserAccount(values)
+  async function onSubmit(values: z.infer<typeof SignupValidation>) {
+    const newUser = await createUserAccount(values);
     console.log(newUser);
-    
+
+    if (!newUser) {
+      return toast({
+        title: "Sign up failed. Please try again.",
+      });
+    }
+
+    // const sesion = await signInAccount()
   }
 
   return (
@@ -109,15 +117,23 @@ const SignupForm = () => {
 
           <Button type="submit" className="shad-button_primary">
             {isLoading ? (
-              <div className="flex-center gap-2"><Loader/>Loading...</div>
+              <div className="flex-center gap-2">
+                <Loader />
+                Loading...
+              </div>
             ) : (
               "Sign up"
             )}
           </Button>
           <p className="text-small-regular text-light-2 text-center mt-2">
             Already have an account?
-            <Link to={"/sign-in"} className="text-primary-500 text-small-semibold ml-1">Log in</Link>
-            </p>
+            <Link
+              to={"/sign-in"}
+              className="text-primary-500 text-small-semibold ml-1"
+            >
+              Log in
+            </Link>
+          </p>
         </form>
       </div>
     </Form>
