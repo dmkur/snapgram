@@ -1,22 +1,23 @@
 import { useCallback, useState } from "react";
 import { FileWithPath, useDropzone } from "react-dropzone";
 import { Button } from "../ui/button";
+import { convertFileToUrl } from "@/lib/utils";
 
 type FileUploaderProps = {
-  fieldChange: (FILES: File[]) => void;
+  fieldChange: (files: File[]) => void;
   mediaUrl: string;
 };
 
 const FileUploader = ({ fieldChange, mediaUrl }: FileUploaderProps) => {
   const [file, setFile] = useState<File[]>([]);
-  const [fileUrl, setFileUrl] = useState("");
+  const [fileUrl, setFileUrl] = useState<string>(mediaUrl);
   // What hapends when we actualy drop some files
   const onDrop = useCallback(
     (acceptedFiles: FileWithPath[]) => {
       // Do something with the files
       setFile(acceptedFiles);
       fieldChange(acceptedFiles);
-      setFileUrl(URL.createObjectURL(acceptedFiles[0]));
+      setFileUrl(convertFileToUrl(acceptedFiles[0]));
     },
     [file]
   );
@@ -24,7 +25,7 @@ const FileUploader = ({ fieldChange, mediaUrl }: FileUploaderProps) => {
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
     accept: {
-      "image/*": [".jpeg", ".png", ".jpg", ".svg"],
+      "image/*": [".jpeg", ".png", ".jpg"],
     },
   });
   return (
@@ -34,9 +35,14 @@ const FileUploader = ({ fieldChange, mediaUrl }: FileUploaderProps) => {
     >
       <input {...getInputProps()} className="cursor-pointer" />
       {fileUrl ? (
-        <div className="">test 1 </div>
+        <>
+          <div className="flex flex-1 justify-center w-full p-5 lg:p-10">
+            <img src={fileUrl} alt="file_uploader-img" />
+          </div>
+          <p className="file_uploader-label">Click or drag photo to replace</p>
+        </>
       ) : (
-        <div className="file_uploader-box">
+        <div className="file_uploader-box ">
           <img
             src="/assets/icons/file-upload.svg"
             width={96}
