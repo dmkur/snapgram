@@ -99,10 +99,10 @@ export async function createPost(post: INewPost) {
         if (!uploadedFile) throw Error
 
         // Get file URL
-        const fileUrl = await getFilePreview(uploadedFile.$id)
+        const fileUrl = getFilePreview(uploadedFile.$id)
         // If we can`t fjint file we need delete and throw Error
         if (!fileUrl) {
-           await deleteFile(uploadedFile.$id)
+            await deleteFile(uploadedFile.$id)
             throw Error
         }
 
@@ -116,15 +116,15 @@ export async function createPost(post: INewPost) {
             appwriteConfig.postCollectionId,
             ID.unique(),
             {
-                creator:post.userId,
-                caption:post.caption,
-                imageUrl:fileUrl,
-                imageId:uploadedFile.$id,
-                location:post.location,
-                tags:tags
+                creator: post.userId,
+                caption: post.caption,
+                imageUrl: fileUrl,
+                imageId: uploadedFile.$id,
+                location: post.location,
+                tags: tags
             }
         )
-        if(!newPost) {
+        if (!newPost) {
             await deleteFile(uploadedFile.$id)
             throw Error
         }
@@ -149,7 +149,7 @@ export async function uploadFile(file: File) {
     }
 }
 
-export async function getFilePreview(fileId: string) {
+export function getFilePreview(fileId: string) {
     try {
         // 2000 and 2000 width and height, top - ??, 100 - quality
         const fileUrl = storage.getFilePreview(
@@ -161,7 +161,7 @@ export async function getFilePreview(fileId: string) {
             100
         )
         if (!fileUrl) throw Error;
-        
+
         return fileUrl
     } catch (error) {
         console.log(error);
@@ -186,10 +186,62 @@ export async function getRecentPosts() {
             [Query.orderDesc('$createdAt'), Query.limit(20)]
         )
 
-        if(!posts) throw Error
+        if (!posts) throw Error
 
         return posts
     } catch (error) {
-        console.log(error);        
+        console.log(error);
+    }
+}
+
+export async function likePost(postId: string, likesArray: string[]) {
+    try {
+        const updatedPost = await databases.updateDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.postCollectionId,
+            postId,
+            {
+                likes: likesArray
+            }
+        )
+        if (!updatedPost) throw Error
+
+        return updatedPost
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function savePost(postId: string, userId: string) {
+    try {
+        const updatedPost = await databases.createDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.savesCollectionId,
+            ID.unique(),
+            {
+                user: userId,
+                post: postId
+            }
+        )
+        if (!updatedPost) throw Error
+
+        return updatedPost
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function deleteSavedPost(savedRecordId: string) {
+    try {
+        const statusCode = await databases.deleteDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.savesCollectionId,
+            savedRecordId
+        )
+        if (!statusCode) throw Error
+
+        return { status: 'ok' }
+    } catch (error) {
+        console.log(error);
     }
 }
