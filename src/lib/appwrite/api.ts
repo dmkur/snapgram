@@ -1,5 +1,5 @@
 import { ID, Query } from "appwrite"
-import { INewPost, INewUser } from "@/types";
+import { INewPost, INewUser, IUpdatePost } from "@/types";
 import { account, appwriteConfig, avatars, databases, storage } from "./config";
 
 
@@ -241,6 +241,91 @@ export async function deleteSavedPost(savedRecordId: string) {
         if (!statusCode) throw Error
 
         return { status: 'ok' }
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function getPostById(postId: string) {
+    try {
+        const post = await databases.getDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.postCollectionId,
+            postId
+        )
+
+        return post
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function UpdatePost(post: IUpdatePost) {
+    // figurout if we try update img
+    // it will true if file.length > 0
+    const hasFileToUpdate = post.file.length > 0
+    try {
+        // form our image
+        let image = {
+            imageUrl: post.imageUrl,
+            imageId: post.imageId
+        }
+
+        if (hasFileToUpdate) {
+            // Upload img to storage
+            const uploadedFile = await uploadFile(post.file[0])
+
+            if (!uploadedFile) throw Error
+
+            // Get file URL
+            const fileUrl = getFilePreview(uploadedFile.$id)
+            // If we can`t fjint file we need delete and throw Error
+            if (!fileUrl) {
+                await deleteFile(uploadedFile.$id)
+                throw Error
+            }
+            // update our image by new updated data
+            image = { ...image, imageUrl: fileUrl, imageId: uploadedFile.$id }
+        }
+
+        // Convert tags in to array
+        // replace(/ /g, '') - find empty strings globaly and replece it by empty space ''
+        const tags = post.tags?.replace(/ /g, '').split(',') || []
+
+        // update post 
+        const updatedPost = await databases.updateDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.postCollectionId,
+            post.postId,
+            {
+                caption: post.caption,
+                imageUrl: image.imageUrl,
+                imageId: image.imageId,
+                location: post.location,
+                tags: tags
+            }
+        )
+        if (!updatedPost) {
+            await deleteFile(post.imageId)
+            throw Error
+        }
+
+        return updatedPost
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function deletePost(postId: string, imageId: string) {
+    if (!postId || !imageId) throw Error
+    try {
+        await databases.deleteDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.postCollectionId,
+            postId
+        )
+
+        return { "status": "ok" }
     } catch (error) {
         console.log(error);
     }

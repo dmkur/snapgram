@@ -34,7 +34,7 @@ const App = () => {
           <Route path="/saved" element={<Saved />} />
           <Route path="/all-users" element={<AllUsers />} />
           <Route path="/create-post" element={<CreatePost />} />
-          <Route path="/updatepost/:id" element={<EditPost />} />
+          <Route path="/update-post/:id" element={<EditPost />} />
           <Route path="/posts/:id" element={<PostDetails />} />
           {/* "*" - mean all after :id/ also going to that point(Profile)*/}
           <Route path="/profile/:id/*" element={<Profile />} />

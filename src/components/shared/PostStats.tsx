@@ -1,7 +1,7 @@
 import {
   useGetCurrentUser,
   useLikePost,
-  usedeleteSavedPost,
+  useDeleteSavedPost,
   useSavePost,
 } from "@/lib/react-query/queriesAndMutations";
 import { checkIsLiked } from "@/lib/utils";
@@ -23,7 +23,7 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
   const { mutate: likePost } = useLikePost();
   const { mutate: savePost, isPending: isSavingPost } = useSavePost();
   const { mutate: deleteSavedPost, isPending: isDeletingSaved } =
-    usedeleteSavedPost();
+    useDeleteSavedPost();
 
   const { data: currentUser } = useGetCurrentUser();
   const savedPostRecord = currentUser?.save.find(
