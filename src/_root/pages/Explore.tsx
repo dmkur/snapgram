@@ -66,7 +66,7 @@ const Explore = () => {
       </div>
       <div className="flex flex-wrap gap-9 w-full max-w-5xl">
         {shouldShowSearchResults ? (
-          <SearchResults />
+          <SearchResults isSearchFetching={isSearchFetching} searchedPosts={searchedPosts} />
         ) : shouldShowPost ? (
           <p className="text-light-4 mt-10 text-center w-full">End of Posts</p>
         ) : (
@@ -75,6 +75,14 @@ const Explore = () => {
           ))
         )}
       </div>
+
+      {hasNextPage && !searchValue && (
+        // need ref that understand when we scroll and see ref 
+        // it's mean we are in the bottom and need dowload new posts
+        <div ref={ref} className="mt-10">
+          <Loader/>
+        </div>
+      )}
     </div>
   );
 };
