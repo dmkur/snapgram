@@ -330,3 +330,44 @@ export async function deletePost(postId: string, imageId: string) {
         console.log(error);
     }
 }
+
+export async function getInfinitePosts({ pageParam }: { pageParam: number }) {
+    // get last post by param "updateAt"
+    const queries: any[] = [Query.orderDesc("$updatedAt"), Query.limit(9)];
+    
+    if (pageParam) {
+        // it's mean if we gat 10 posts get me next 10
+        queries.push(Query.cursorAfter(pageParam.toString()))
+    }
+
+    try {
+        const posts = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.postCollectionId,
+            queries
+        )
+
+        if (!posts) throw Error
+
+        return posts
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function searchPost(searchTerm:string) {   
+
+    try {
+        const posts = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.postCollectionId,
+            [Query.search("caption", searchTerm)]
+        )
+
+        if (!posts) throw Error
+
+        return posts
+    } catch (error) {
+        console.log(error);
+    }
+}
