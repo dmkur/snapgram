@@ -7,15 +7,25 @@ import {
   useGetPosts,
   useSearchPosts,
 } from "@/lib/react-query/queriesAndMutations";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useInView } from "react-intersection-observer";
 
 const Explore = () => {
+  const { ref, inView } = useInView({
+    /* Optional options */
+    threshold: 0,
+  });
+
   const [searchValue, setSerachValue] = useState("");
   const { data: posts, fetchNextPage, hasNextPage } = useGetPosts();
   // help get post with delay
   const debouncedValu = useDebounce(searchValue, 500);
   const { data: searchedPosts, isFetching: isSearchFetching } =
     useSearchPosts(debouncedValu);
+
+  useEffect(() => {
+    if(inView && !searchValue) fetchNextPage()
+  }, [inView,searchValue]);
 
   if (!posts) {
     return (
@@ -66,7 +76,10 @@ const Explore = () => {
       </div>
       <div className="flex flex-wrap gap-9 w-full max-w-5xl">
         {shouldShowSearchResults ? (
-          <SearchResults isSearchFetching={isSearchFetching} searchedPosts={searchedPosts} />
+          <SearchResults
+            isSearchFetching={isSearchFetching}
+            searchedPosts={searchedPosts}
+          />
         ) : shouldShowPost ? (
           <p className="text-light-4 mt-10 text-center w-full">End of Posts</p>
         ) : (
@@ -77,10 +90,10 @@ const Explore = () => {
       </div>
 
       {hasNextPage && !searchValue && (
-        // need ref that understand when we scroll and see ref 
+        // need ref that understand when we scroll and see ref
         // it's mean we are in the bottom and need dowload new posts
         <div ref={ref} className="mt-10">
-          <Loader/>
+          <Loader />
         </div>
       )}
     </div>
